@@ -80,7 +80,7 @@ var dudeBounds = new PIXI.Rectangle(
 // };
 
 var tick = 0;
-setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
+//setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
 app.ticker.add(function() {
 	// iterate through the sprites and update their position
 	// brightenPoint.direction += brightenPoint.turningSpeed * 0.01;
@@ -171,49 +171,52 @@ function loadPixelsFromImage(src, document) {
 
 	base_image.onload = function() {
 		console.log("pic onloaded");
-		context.drawImage(base_image, 0, 0);
+		context.drawImage(
+			base_image,
+			-200,
+			0,
+			base_image.width * 0.5,
+			base_image.height * 0.5
+		);
+		const start = new Date();
 		loadPixelsFromImage.pixelArray = context
 			.getImageData(0, 0, newPictureX, newPictureY)
-			.data.reduce((newArr, num, i) => {
-				if (i % 4 === 0) return newArr.concat([{ r: num }]);
-				else {
-					switch (i % 4) {
-						case 1:
-							newArr[newArr.length - 1].g = num;
-							break;
-						case 2:
-							newArr[newArr.length - 1].b = num;
-							break;
-						case 3:
-							newArr[newArr.length - 1].a = num;
-							break;
-						default:
-							throw "error in reduce!";
-					}
-					return newArr;
-				}
+			.data.map((e, i, arr) => {
+				if (i === arr.length - 1)
+					console.log(
+						new Date() - start,
+						"ms since starting getImageData"
+					);
+				return e;
+			})
+			.reduce((newArr, num, i) => {
+				if (i % 4 === 0) newArr.push({ r: num });
+				if (i % 4 === 1) newArr[newArr.length - 1].g = num;
+				if (i % 4 === 2) newArr[newArr.length - 1].b = num;
+				return newArr;
 			}, []);
+		console.log(new Date() - start, "ms loading pixels");
 	};
 }
 
 function rgbToHexNum(rgb) {
-	if (
-		Array.isArray(rgb) &&
-		rgb.length > 2 &&
-		typeof rgb[0] === "number" &&
-		typeof rgb[1] === "number" &&
-		typeof rgb[2] === "number"
-	)
-		return (rgb[0] << 16) + (rgb[1] << 8) + rgb[2];
-	if (
-		typeof rgb === "object" &&
-		typeof rgb.r === "number" &&
-		typeof rgb.g === "number" &&
-		typeof rgb.b === "number"
-	)
-		return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
+	// if (
+	// 	Array.isArray(rgb) &&
+	// 	rgb.length > 2 &&
+	// 	typeof rgb[0] === "number" &&
+	// 	typeof rgb[1] === "number" &&
+	// 	typeof rgb[2] === "number"
+	// )
+	// 	return (rgb[0] << 16) + (rgb[1] << 8) + rgb[2];
+	// if (
+	// 	typeof rgb === "object" &&
+	// 	typeof rgb.r === "number" &&
+	// 	typeof rgb.g === "number" &&
+	// 	typeof rgb.b === "number"
+	// )
+	return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
 }
 
 // var context = document.createElement("canvas").getContext("2d");
 // loadPixelsFromImage("../../../airport/pics/bb-ipad.png", document);
-loadPixelsFromImage("football.jpg", document);
+loadPixelsFromImage("cat.png", document);
