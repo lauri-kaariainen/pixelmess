@@ -3,7 +3,7 @@ function init(newPictureX, newPictureY) {
 	var app = new PIXI.Application();
 	document.body.appendChild(app.view);
 
-	var sprites = new PIXI.particles.ParticleContainer(50000, {
+	var sprites = new PIXI.particles.ParticleContainer(100000, {
 		scale: true,
 		position: true,
 		rotation: true,
@@ -17,18 +17,13 @@ function init(newPictureX, newPictureY) {
 
 	var totalSprites = app.renderer instanceof PIXI.WebGLRenderer ? 50000 : 100;
 
-	// var newPictureX = 500;
-	// var newPictureY = 300;
-
-	//resolutionrenderer.autoResize = true;
-	app.renderer.resize(window.innerWidth, window.innerHeight);
+	//app.renderer.resize(window.innerWidth, window.innerHeight);
 	app.renderer.resize(newPictureX, newPictureY);
+	// app.renderer.autoResize = true;
 
 	for (var i = 0; i < totalSprites; i++) {
 		// create a new Sprite
 		var dude = PIXI.Sprite.fromImage("white_square.png");
-
-		// dude.tint = Math.random() * 0xe8d4cd;
 
 		// set the anchor point so the texture is centerd on the sprite
 		dude.anchor.set(0.5);
@@ -41,9 +36,6 @@ function init(newPictureX, newPictureY) {
 		dude.x = Math.random() * app.screen.width;
 		dude.y = Math.random() * app.screen.height;
 		dude.tint = 0xffffff;
-		//dude.alpha = Math.random() > 0.999 ? 1 : 0.1;
-		//dude.alpha = Math.random() + 0.5;
-		// dude.tint = Math.random() * 0x808080;
 
 		// create a random direction in radians
 		dude.direction = Math.random() * Math.PI * 2;
@@ -71,37 +63,9 @@ function init(newPictureX, newPictureY) {
 		app.screen.height + dudeBoundsPadding * 2
 	);
 
-	// var brightenPoint = {
-	// 	x: 300,
-	// 	y: 300,
-	// 	direction: Math.random() * Math.PI * 2,
-	// 	turningSpeed: 0.4,
-	// 	speed: 1,
-	// 	rotation: 0
-	// };
-
 	var tick = 0;
-	//setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
+	setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
 	app.ticker.add(function() {
-		// iterate through the sprites and update their position
-		// brightenPoint.direction += brightenPoint.turningSpeed * 0.01;
-		// brightenPoint.rotation = -brightenPoint.direction + Math.PI;
-		// brightenPoint.x +=
-		// 	Math.sin(brightenPoint.direction) * brightenPoint.speed * 6;
-		// brightenPoint.y +=
-		// 	Math.cos(brightenPoint.direction) * brightenPoint.speed * 6;
-		// if (brightenPoint.x < dudeBounds.x) {
-		// 	brightenPoint.x += dudeBounds.width;
-		// } else if (brightenPoint.x > dudeBounds.x + dudeBounds.width) {
-		// 	brightenPoint.x -= dudeBounds.width;
-		// }
-
-		// if (brightenPoint.y < dudeBounds.y) {
-		// 	brightenPoint.y += dudeBounds.height;
-		// } else if (brightenPoint.y > dudeBounds.y + dudeBounds.height) {
-		// 	brightenPoint.y -= dudeBounds.height;
-		// }
-
 		this.counter = this.counter || 0;
 
 		for (var i = 0; i < maggots.length; i++) {
@@ -120,29 +84,11 @@ function init(newPictureX, newPictureY) {
 				normalizedLocation >= 0
 			) {
 				var RGB = loadPixelsFromImage.pixelArray[normalizedLocation];
-				//console.log(parseInt(normalizedLocation);
-				// RGB = { r: 255, g: 0, b: 0 };
-				//dude.tint = parseInt("" + RGB.r + RGB.g + RGB.b);
 				dude.tint = rgbToHexNum(RGB);
 				if (dude.tint < 100) dude.renderable = false;
 				else dude.renderable = true;
 			}
-			// dude.rotation = -dude.direction + Math.PI;
-			// if (dude.x > brightenPoint.x - 30 && dude.x < brightenPoint.x + 30)
-			// 	if (
-			// 		dude.y > brightenPoint.y - 30 &&
-			// 		dude.y < brightenPoint.y + 30
-			// 	) {
-			// 		dude.alpha = 1;
-			// 		dude.tint = Math.random() * 0xffffff;
-			// 		dude.speed = (2 + Math.random() * 2) * 0.2 * 10;
-			// 	}
-
-			// if (dude.alpha > 0.1) {
-			// 	dude.alpha -= 0.01;
-			// 	dude.speed *= 0.95;
-			// }
-			// wrap the maggots
+			// wrap the pixels
 			if (dude.x < dudeBounds.x) {
 				dude.x += dudeBounds.width;
 			} else if (dude.x > dudeBounds.x + dudeBounds.width) {
@@ -154,9 +100,6 @@ function init(newPictureX, newPictureY) {
 			} else if (dude.y > dudeBounds.y + dudeBounds.height) {
 				dude.y -= dudeBounds.height;
 			}
-			// const point = new PIXI.Point(200, 305);
-			// const test = app.renderer.plugins.interaction.hitTest(point);
-			// if (test !== null) console.log(test);
 		}
 
 		// increment the ticker
@@ -164,9 +107,7 @@ function init(newPictureX, newPictureY) {
 	});
 }
 function loadPixelsFromImage(src, document) {
-	// var canvas = document.getElementById("viewport"),
-	// 	context = canvas.getContext("2d");
-	var context = document.createElement("canvas").getContext("2d");
+	const context = document.createElement("canvas").getContext("2d");
 	const base_image = new Image();
 	base_image.src = src;
 	base_image.onload = function() {
@@ -213,6 +154,4 @@ function rgbToHexNum(rgb) {
 	return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
 }
 
-// var context = document.createElement("canvas").getContext("2d");
-// loadPixelsFromImage("../../../airport/pics/bb-ipad.png", document);
 loadPixelsFromImage("cat.png", document);
