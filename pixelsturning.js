@@ -3,6 +3,7 @@
 const scaleUpBtn = document.querySelector(".scalebuttonUp");
 const scaleDownBtn = document.querySelector(".scalebuttonDown");
 const randomBtn = document.querySelector(".randomButton");
+const backgroundBtn = document.querySelector(".backgroundButton");
 
 scaleUpBtn.onclick = scaleUpBtn.ontouchstart = scaleUpBtn.onselectstart = event => {
   event.preventDefault();
@@ -17,6 +18,12 @@ scaleDownBtn.onclick = scaleDownBtn.ontouchstart = scaleDownBtn.onselectstart = 
 };
 randomBtn.onclick = randomBtn.ontouchstart = randomBtn.onselectstart = loadNewPic;
 
+backgroundBtn.onclick = backgroundBtn.ontouchstart = backgroundBtn.onselectstart = event => {
+  event.preventDefault();
+  window.app.stage.children[0].renderable
+    ? (app.stage.children[0].renderable = false)
+    : (app.stage.children[0].renderable = true);
+};
 //start
 window.app = null;
 
@@ -116,6 +123,9 @@ function render(newPictureX, newPictureY, imageSrc) {
     bgContainer.addChild(slide);
     //app.renderer.render(app.stage);
   });
+
+  //set background off initially
+  app.stage.children[0].renderable = false;
 
   // create an array to store all the sprites
   var maggots = [];
@@ -240,7 +250,6 @@ function background(bgSize, inputSprite, type, forceSize) {
     .endFill();
   bgContainer.mask = mask;
   bgContainer.addChild(mask);
-  console.log(sprite);
   bgContainer.addChild(sprite);
 
   var sp = { x: sprite.width, y: sprite.height };
@@ -261,7 +270,6 @@ function background(bgSize, inputSprite, type, forceSize) {
 
   sprite.scale = new PIXI.Point(scale, scale);
   sprite.position = pos;
-
   return bgContainer;
 }
 // loadPixelsFromImage("../../contour/images/girl.jpg", document);
