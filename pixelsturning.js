@@ -1,24 +1,92 @@
 "use strict";
 
-const scaleUp = document.querySelector(".scalebuttonUp");
-const scaleDown = document.querySelector(".scalebuttonDown");
+const scaleUpBtn = document.querySelector(".scalebuttonUp");
+const scaleDownBtn = document.querySelector(".scalebuttonDown");
+const randomBtn = document.querySelector(".randomButton");
 
-scaleUp.onclick = scaleUp.ontouchstart = scaleUp.onselectstart = event => {
+scaleUpBtn.onclick = scaleUpBtn.ontouchstart = scaleUpBtn.onselectstart = event => {
   event.preventDefault();
   window.scaleSize = window.scaleSize || 0.6;
   if (window.scaleSize < 5.0) window.scaleSize += 0.11;
 };
-scaleDown.onclick = scaleDown.ontouchstart = scaleDown.onselectstart = event => {
+scaleDownBtn.onclick = scaleDownBtn.ontouchstart = scaleDownBtn.onselectstart = event => {
   event.preventDefault();
   window.scaleSize = window.scaleSize || 0.6;
   if (window.scaleSize > 0.11) window.scaleSize -= 0.11;
   else window.scaleSize = 0.05;
 };
+randomBtn.onclick = randomBtn.ontouchstart = randomBtn.onselectstart = loadNewPic;
 
-setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
+//start
+window.app = null;
 
-function init(newPictureX, newPictureY, imageSrc) {
+loadNewPic();
+
+function loadNewPic() {
+  window.app ? window.app.destroy({ children: true }) : "";
+  document.querySelector("canvas")
+    ? document.querySelector("canvas").remove()
+    : "";
+  getFinalUrlAfterRedirects(
+    "https://source.unsplash.com/collection/1386982/900x700"
+  )
+    .then(function(url) {
+      loadPixelsFromImage(url, document);
+    })
+    .catch(function(e) {
+      alert("error loading!");
+      console.log(e);
+    });
+}
+
+function getFinalUrlAfterRedirects(url) {
+  return new Promise(function(resolve, reject) {
+    const req = new XMLHttpRequest();
+
+    req.onreadystatechange = function() {
+      if (req.readyState === 4) {
+        // && req.status===200) {
+        resolve(req.responseURL);
+      }
+    };
+
+    req.open("GET", url, true);
+    req.send();
+  });
+}
+
+function loadPixelsFromImage(finalUrl, document) {
+  const context = document.createElement("canvas").getContext("2d");
+  const base_image = new Image();
+  base_image.crossOrigin = "Anonymous";
+  base_image.src = finalUrl;
+  base_image.onload = function() {
+    const picSizeScale =
+      base_image.width / window.innerWidth > 0.8
+        ? 1 / (base_image.width / window.innerWidth) * 0.8
+        : 1;
+    const scaledWidth = Math.floor(base_image.width * picSizeScale);
+    const scaledHeight = Math.floor(base_image.height * picSizeScale);
+    context.canvas.width = base_image.width;
+    context.canvas.height = base_image.height;
+    context.drawImage(base_image, 0, 0, scaledWidth, scaledHeight);
+    const start = new Date();
+    loadPixelsFromImage.pixelArray = context
+      .getImageData(0, 0, scaledWidth, scaledHeight)
+      .data.reduce((newArr, num, i) => {
+        if (i % 4 === 0) newArr.push({ r: num });
+        if (i % 4 === 1) newArr[newArr.length - 1].g = num;
+        if (i % 4 === 2) newArr[newArr.length - 1].b = num;
+        return newArr;
+      }, []);
+    console.log(new Date() - start, "ms loading pixels");
+    render(scaledWidth, scaledHeight, finalUrl);
+  };
+}
+
+function render(newPictureX, newPictureY, imageSrc) {
   var app = new PIXI.Application();
+  window.app = app;
   document.querySelector(".canvasDiv").appendChild(app.view);
 
   var sprites = new PIXI.particles.ParticleContainer(100000, {
@@ -35,7 +103,7 @@ function init(newPictureX, newPictureY, imageSrc) {
   console.log("bgContainer added to stage!");
   app.stage.addChild(sprites);
   console.log("sprites added to stage!");
-
+  PIXI.loader.reset();
   PIXI.loader.add(imageSrc).load(function() {
     const sprite = new PIXI.Sprite.fromImage(imageSrc, true);
     sprite.height = newPictureY;
@@ -124,7 +192,7 @@ function init(newPictureX, newPictureY, imageSrc) {
         normalizedLocation >= 0
       ) {
         var RGB = loadPixelsFromImage.pixelArray[normalizedLocation];
-        dude.tint = rgbToHexNum(RGB);
+        dude.tint = rgbToDec(RGB);
       }
       //}
       // wrap the pixels
@@ -145,54 +213,8 @@ function init(newPictureX, newPictureY, imageSrc) {
     tick += 0.1;
   });
 }
-function loadPixelsFromImage(finalUrl, document) {
-  const context = document.createElement("canvas").getContext("2d");
-  const base_image = new Image();
-  base_image.crossOrigin = "Anonymous";
-  base_image.src = finalUrl;
-  base_image.onload = function() {
-    const picSizeScale =
-      base_image.width / window.innerWidth > 0.8
-        ? 1 / (base_image.width / window.innerWidth) * 0.8
-        : 1;
-    const scaledWidth = Math.floor(base_image.width * picSizeScale);
-    const scaledHeight = Math.floor(base_image.height * picSizeScale);
-    context.canvas.width = base_image.width;
-    context.canvas.height = base_image.height;
-    console.log("scaled pic onloaded:", picSizeScale);
-    context.drawImage(base_image, 0, 0, scaledWidth, scaledHeight);
-    console.log("src:", base_image.src);
-    const start = new Date();
-    loadPixelsFromImage.pixelArray = context
-      .getImageData(0, 0, scaledWidth, scaledHeight)
-      .data.reduce((newArr, num, i) => {
-        if (i % 4 === 0) newArr.push({ r: num });
-        if (i % 4 === 1) newArr[newArr.length - 1].g = num;
-        if (i % 4 === 2) newArr[newArr.length - 1].b = num;
-        return newArr;
-      }, []);
-    console.log(new Date() - start, "ms loading pixels");
-    init(scaledWidth, scaledHeight, finalUrl);
-  };
-}
 
-function getFinalUrlAfterRedirects(url) {
-  return new Promise(function(resolve, reject) {
-    const req = new XMLHttpRequest();
-
-    req.onreadystatechange = function() {
-      if (req.readyState === 4) {
-        // && req.status===200) {
-        resolve(req.responseURL);
-      }
-    };
-
-    req.open("GET", url, true);
-    req.send();
-  });
-}
-
-function rgbToHexNum(rgb) {
+function rgbToDec(rgb) {
   // if (
   // 	Array.isArray(rgb) &&
   // 	rgb.length > 2 &&
@@ -243,14 +265,3 @@ function background(bgSize, inputSprite, type, forceSize) {
   return bgContainer;
 }
 // loadPixelsFromImage("../../contour/images/girl.jpg", document);
-//start
-getFinalUrlAfterRedirects(
-  "https://source.unsplash.com/collection/1386982/900x700"
-)
-  .then(function(url) {
-    loadPixelsFromImage(url, document);
-  })
-  .catch(function(e) {
-    alert("error loading!");
-    console.log(e);
-  });

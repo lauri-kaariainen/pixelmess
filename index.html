@@ -51,6 +51,7 @@
 			margin: 0;
 			text-decoration: none;
 			background: #0069ed;
+			font-variant: small-caps;
 			color: #ffffff;
 			font-family: sans-serif;
 			font-size: 1rem;
@@ -62,9 +63,25 @@
 			-moz-appearance: none;
 		}
 
+		button.white {
+			background: white;
+			color: #0069ed;
+		}
+
+		button.green {
+			background: #2affa3;
+			color: white;
+		}
+
 		button:hover,
 		button:focus {
 			background: #0053ba;
+		}
+
+		button.white:hover,
+		button.white:focus {
+			background: #555555;
+			color: White;
 		}
 
 		button:focus {
@@ -90,6 +107,12 @@
 		<button class="scalebuttonDown">
 			smaller pixels
 		</button>
+		<button class="randomButton white">
+			random
+		</button>
+		<!--button class="backgroundButton green">
+			remove background
+		</button-->
 	</div>
 
 	<script src="pixelsturning.js"></script>
