@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- <script src="../../../libraries/mobilealerts.js"></script> -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.7.1/pixi.min.js"></script>
 	<!--script 
@@ -38,7 +39,37 @@
   			border-radius: 25px;
   			font-variant: small-caps;
   		}
+  		button {
+		    display: inline-block;
+		    border: none;
+		    padding: 1rem 2rem;
+		    margin: 0;
+		    text-decoration: none;
+		    background: #0069ed;
+		    color: #ffffff;
+		    font-family: sans-serif;
+		    font-size: 1rem;
+		    cursor: pointer;
+		    text-align: center;
+		    transition: background 250ms ease-in-out, 
+		                transform 150ms ease;
+		    -webkit-appearance: none;
+		    -moz-appearance: none;
+		}
 
+		button:hover,
+		button:focus {
+		    background: #0053ba;
+		}
+
+		button:focus {
+		    outline: 1px solid #fff;
+		    outline-offset: -4px;
+		}
+
+		button:active {
+		    transform: scale(0.99);
+		}
 	</style>
 </head>
 <body>
@@ -47,12 +78,12 @@
 	<div class="canvasDiv">
 	</div>	
 	<div class="scalebuttons">
-		<div class="scalebuttonUp">
+		<button class="scalebuttonUp">
 			bigger pixels
-		</div>
-		<div class="scalebuttonDown">
+		</button>
+		<button class="scalebuttonDown">
 			smaller pixels
-		</div>
+		</button>
 	</div>
 
 	<script src="pixelsturning.js"></script>

@@ -3,20 +3,23 @@
 const scaleUp = document.querySelector(".scalebuttonUp");
 const scaleDown = document.querySelector(".scalebuttonDown");
 
-scaleUp.onclick = scaleUp.ontouchstart = scaleUp.onselectstart = e => {
+scaleUp.onclick = scaleUp.ontouchstart = scaleUp.onselectstart = event => {
 	event.preventDefault();
 	window.scaleSize = window.scaleSize || 0.6;
 	if (window.scaleSize < 5.0) window.scaleSize += 0.11;
 };
-scaleDown.onclick = scaleDown.ontouchstart = scaleDown.onselectstart = e => {
+scaleDown.onclick = scaleDown.ontouchstart = scaleDown.onselectstart = event => {
 	event.preventDefault();
 	window.scaleSize = window.scaleSize || 0.6;
 	if (window.scaleSize > 0.11) window.scaleSize -= 0.11;
 	else window.scaleSize = 0.05;
 };
 
-function init(newPictureX, newPictureY) {
+//setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
+
+function init(newPictureX, newPictureY, imageSrc) {
 	var app = new PIXI.Application();
+	window.app = app;
 	document.querySelector(".canvasDiv").appendChild(app.view);
 
 	var sprites = new PIXI.particles.ParticleContainer(100000, {
@@ -26,7 +29,21 @@ function init(newPictureX, newPictureY) {
 		uvs: true,
 		alpha: true
 	});
+
+	const bgContainer = new PIXI.Container();
+	app.stage.addChild(bgContainer);
 	app.stage.addChild(sprites);
+
+	PIXI.loader.add(imageSrc).load(function() {
+		var slide = background(
+			{ x: newPictureX, y: newPictureY },
+			new PIXI.Sprite.fromImage(imageSrc),
+			"cover"
+		);
+		bgContainer.addChild(slide);
+
+		app.renderer.render(app.stage);
+	});
 
 	// create an array to store all the sprites
 	var maggots = [];
@@ -80,7 +97,6 @@ function init(newPictureX, newPictureY) {
 	);
 
 	var tick = 0;
-	setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
 	app.ticker.add(function() {
 		this.counter = this.counter || 0;
 		this.counter++;
@@ -128,21 +144,23 @@ function init(newPictureX, newPictureY) {
 function loadPixelsFromImage(src, document) {
 	const context = document.createElement("canvas").getContext("2d");
 	const base_image = new Image();
+	base_image.crossOrigin = "Anonymous";
 	base_image.src = src;
 	base_image.onload = function() {
+		const picSizeScale =
+			base_image.width / window.innerWidth > 0.8
+				? 1 / (base_image.width / window.innerWidth) * 0.8
+				: 1;
+		const scaledWidth = Math.floor(base_image.width * picSizeScale);
+		const scaledHeight = Math.floor(base_image.height * picSizeScale);
 		context.canvas.width = base_image.width;
 		context.canvas.height = base_image.height;
-		console.log("pic onloaded");
-		context.drawImage(
-			base_image,
-			0,
-			0,
-			base_image.width * 1,
-			base_image.height * 1
-		);
+		console.log("scaled pic onloaded:", picSizeScale);
+		context.drawImage(base_image, 0, 0, scaledWidth, scaledHeight);
+
 		const start = new Date();
 		loadPixelsFromImage.pixelArray = context
-			.getImageData(0, 0, base_image.width, base_image.height)
+			.getImageData(0, 0, scaledWidth, scaledHeight)
 			.data.reduce((newArr, num, i) => {
 				if (i % 4 === 0) newArr.push({ r: num });
 				if (i % 4 === 1) newArr[newArr.length - 1].g = num;
@@ -150,8 +168,8 @@ function loadPixelsFromImage(src, document) {
 				return newArr;
 			}, []);
 		console.log(new Date() - start, "ms loading pixels");
-
-		init(base_image.width, base_image.height);
+		console.log(context.canvas.width);
+		init(scaledWidth, scaledHeight, src);
 	};
 }
 
@@ -172,8 +190,44 @@ function rgbToHexNum(rgb) {
 	// )
 	return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
 }
+function background(bgSize, inputSprite, type, forceSize) {
+	var sprite = inputSprite;
+	var bgContainer = new PIXI.Container();
+	var mask = new PIXI.Graphics()
+		.beginFill(0x8bc5ff)
+		.drawRect(0, 0, bgSize.x, bgSize.y)
+		.endFill();
+	bgContainer.mask = mask;
+	bgContainer.addChild(mask);
+	bgContainer.addChild(sprite);
 
-loadPixelsFromImage("../../contour/images/penguins.jpg", document);
+	var sp = { x: sprite.width, y: sprite.height };
+	if (forceSize) sp = forceSize;
+	var winratio = bgSize.x / bgSize.y;
+	var spratio = sp.x / sp.y;
+	var scale = 1;
+	var pos = new PIXI.Point(0, 0);
+	if (type == "cover" ? winratio > spratio : winratio < spratio) {
+		//photo is wider than background
+		scale = bgSize.x / sp.x;
+		pos.y = -(sp.y * scale - bgSize.y) / 2;
+	} else {
+		//photo is taller than background
+		scale = bgSize.y / sp.y;
+		pos.x = -(sp.x * scale - bgSize.x) / 2;
+	}
+
+	sprite.scale = new PIXI.Point(scale, scale);
+	sprite.position = pos;
+
+	return bgContainer;
+}
+// loadPixelsFromImage("../../contour/images/girl.jpg", document);
+loadPixelsFromImage(
+	"https://source.unsplash.com/collection/1386982/900x700",
+	document
+);
+
 /*
 ../
 small/                                             28-Feb-2018 12:51                   -
