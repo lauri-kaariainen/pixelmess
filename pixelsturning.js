@@ -1,7 +1,23 @@
 "use strict";
+
+const scaleUp = document.querySelector(".scalebuttonUp");
+const scaleDown = document.querySelector(".scalebuttonDown");
+
+scaleUp.onclick = scaleUp.ontouchstart = scaleUp.onselectstart = e => {
+	event.preventDefault();
+	window.scaleSize = window.scaleSize || 0.6;
+	if (window.scaleSize < 5.0) window.scaleSize += 0.11;
+};
+scaleDown.onclick = scaleDown.ontouchstart = scaleDown.onselectstart = e => {
+	event.preventDefault();
+	window.scaleSize = window.scaleSize || 0.6;
+	if (window.scaleSize > 0.11) window.scaleSize -= 0.11;
+	else window.scaleSize = 0.05;
+};
+
 function init(newPictureX, newPictureY) {
 	var app = new PIXI.Application();
-	document.body.appendChild(app.view);
+	document.querySelector(".canvasDiv").appendChild(app.view);
 
 	var sprites = new PIXI.particles.ParticleContainer(100000, {
 		scale: true,
@@ -15,7 +31,7 @@ function init(newPictureX, newPictureY) {
 	// create an array to store all the sprites
 	var maggots = [];
 
-	var totalSprites = app.renderer instanceof PIXI.WebGLRenderer ? 50000 : 100;
+	var totalSprites = app.renderer instanceof PIXI.WebGLRenderer ? 30000 : 100;
 
 	//app.renderer.resize(window.innerWidth, window.innerHeight);
 	app.renderer.resize(newPictureX, newPictureY);
@@ -29,8 +45,8 @@ function init(newPictureX, newPictureY) {
 		dude.anchor.set(0.5);
 
 		// different maggots, different sizes
-		dude.scale.set(0.8 + Math.random() * 0.3);
-		dude.scale.set(0.4);
+		dude.scale.set(0.6 + Math.random() * 0.3);
+		//dude.scale.set(0.8);
 
 		// scatter them all
 		dude.x = Math.random() * app.screen.width;
@@ -67,15 +83,19 @@ function init(newPictureX, newPictureY) {
 	setInterval(() => console.log(app.ticker.FPS, "fps"), 1000);
 	app.ticker.add(function() {
 		this.counter = this.counter || 0;
-
+		this.counter++;
 		for (var i = 0; i < maggots.length; i++) {
 			var dude = maggots[i];
+
+			if (window.scaleSize && dude.scale !== window.scaleSize)
+				dude.scale.set(window.scaleSize);
 
 			//dude.scale.y = 0.95 + Math.sin(tick + dude.offset) * 0.05;
 			//dude.direction += dude.turningSpeed * 0.01;
 			dude.x += Math.sin(dude.direction) * (dude.speed * dude.scale.y);
 			dude.y += Math.cos(dude.direction) * (dude.speed * dude.scale.y);
 
+			//if (this.counter % 2 === 0) {
 			var normalizedLocation =
 				Math.floor(dude.y) * newPictureX + Math.floor(dude.x);
 			if (
@@ -85,9 +105,8 @@ function init(newPictureX, newPictureY) {
 			) {
 				var RGB = loadPixelsFromImage.pixelArray[normalizedLocation];
 				dude.tint = rgbToHexNum(RGB);
-				if (dude.tint < 100) dude.renderable = false;
-				else dude.renderable = true;
 			}
+			//}
 			// wrap the pixels
 			if (dude.x < dudeBounds.x) {
 				dude.x += dudeBounds.width;
@@ -154,4 +173,22 @@ function rgbToHexNum(rgb) {
 	return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
 }
 
-loadPixelsFromImage("cat.png", document);
+loadPixelsFromImage("../../contour/images/penguins.jpg", document);
+/*
+../
+small/                                             28-Feb-2018 12:51                   -
+annihilator.png                                    26-Feb-2018 12:11              625405
+bobafett.jpg                                       27-Jan-2018 21:28               89447
+daftpunk.jpg                                       17-Feb-2018 15:46              277027
+girl.jpg                                           28-Dec-2009 14:17              350667
+lake.jpg                                           28-Dec-2009 14:18              179118
+lighthouse.jpg                                     14-Jul-2009 04:52              561276
+macbook.jpg                                        23-Feb-2018 23:22             1274490
+meter.jpg                                          11-Jun-2012 21:00              781180
+penguins.jpg                                       14-Jul-2009 04:52              777835
+plate.jpg                                          26-Aug-2012 12:17             1402288
+skull.png                                          22-Feb-2018 16:02              515823
+smallen.sh                                         23-Feb-2018 23:06                   1
+vader.jpg                                          17-Feb-2018 15:46              192150
+window.jpg 
+*/

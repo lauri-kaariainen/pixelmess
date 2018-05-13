@@ -14,15 +14,47 @@
   		}
   		body {
   			display: flex;
+  			flex-direction: column;
   			height: 100%;
+  			width:100%;
   			justify-content: center;
   			align-items: center;
+
   		}
+  		.scalebuttons {
+  			display: flex;
+  			width:80%;
+  			flex-direction: row;
+  			justify-content: space-evenly;
+  			align-items:start;
+  		}
+  		.scalebuttons div{
+  			margin-top: 60px;
+  			border:solid white 6px;
+  			font-family: sans-serif;
+  			padding:20px;
+  			color: white;
+  			font-size: 1em;
+  			border-radius: 25px;
+  			font-variant: small-caps;
+  		}
+
 	</style>
 </head>
 <body>
 	<!-- <canvas data-anchor="grid"></canvas> -->
 	<!-- <script src="//cdn.rawgit.com/dnieh/pixel-grid/5c6f73b2/pixelGrid.js"></script> -->
+	<div class="canvasDiv">
+	</div>	
+	<div class="scalebuttons">
+		<div class="scalebuttonUp">
+			bigger pixels
+		</div>
+		<div class="scalebuttonDown">
+			smaller pixels
+		</div>
+	</div>
+
 	<script src="pixelsturning.js"></script>
 
 </body>
