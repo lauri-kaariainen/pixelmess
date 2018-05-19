@@ -13,6 +13,7 @@
 		html {
 			background: black;
 			height: 100%;
+			overflow: hidden;
 		}
 
 		body {
@@ -20,17 +21,32 @@
 			flex-direction: column;
 			height: 100%;
 			width: 100%;
-			justify-content: space-evenly;
+			justify-content: flex-end;
 			align-items: center;
+			margin: 0;
 
+		}
+
+		.canvasDiv {
+			/* height: 700px; */
+			/* flex-grow: 2; */
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			z-index: -1;
 		}
 
 		.scalebuttons {
 			display: flex;
 			width: 80%;
 			flex-direction: row;
+			/* flex-grow: 1; */
+			justify-content: space-around;
 			justify-content: space-evenly;
-			align-items: start;
+
+			/* align-items: end; */
 		}
 
 		.scalebuttons div {
@@ -73,8 +89,29 @@
 			color: white;
 		}
 
-		button:hover,
-		button:focus {
+		button.transparent {
+			background: transparent;
+			color: white;
+			border: 3px solid white;
+		}
+
+		/* button.transparent:hover, */
+
+		button.transparent:active,
+
+		/* button.transparent:focus */
+
+			{
+			background: white;
+			color: black;
+		}
+
+		/* button:hover, */
+
+		button.active
+		/* button:focus  */
+
+			{
 			background: #0053ba;
 		}
 
@@ -107,16 +144,19 @@
 	<div class="canvasDiv">
 	</div>
 	<div class="scalebuttons">
-		<button class="scalebuttonUp">
+		<button class="scalebuttonUp transparent">
 			bigger pixels
 		</button>
-		<button class="scalebuttonDown">
+		<button class="scalebuttonDown transparent">
 			smaller pixels
 		</button>
-		<button class="randomButton white">
+	</div>
+	<div class="scalebuttons">
+
+		<button class="randomButton transparent">
 			random
 		</button>
-		<button class="backgroundButton green">
+		<button class="backgroundButton transparent">
 			toggle background
 		</button>
 	</div>

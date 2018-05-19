@@ -4,6 +4,8 @@ const scaleUpBtn = document.querySelector(".scalebuttonUp");
 const scaleDownBtn = document.querySelector(".scalebuttonDown");
 const randomBtn = document.querySelector(".randomButton");
 const backgroundBtn = document.querySelector(".backgroundButton");
+// const manyPixelsBtn = document.querySelector(".manyPixelsButton");
+// const fewPixelsBtn = document.querySelector(".fewPixelsButton");
 
 scaleUpBtn.onclick = scaleUpBtn.ontouchstart = scaleUpBtn.onselectstart = event => {
   event.preventDefault();
@@ -24,18 +26,30 @@ backgroundBtn.onclick = backgroundBtn.ontouchstart = backgroundBtn.onselectstart
     ? (app.stage.children[0].renderable = false)
     : (app.stage.children[0].renderable = true);
 };
+
+// manyPixelsBtn.onclick = manyPixelsBtn.ontouchstart = manyPixelsBtn.onselectstart = event => {
+//   event.preventDefault();
+// };
+
+// fewPixelsBtn.onclick = fewPixelsBtn.ontouchstart = fewPixelsBtn.onselectstart = event => {
+//   event.preventDefault();
+// };
 //start
 window.app = null;
 
 loadNewPic();
 
 function loadNewPic() {
-  window.app ? window.app.destroy({ children: true }) : "";
+  window.app && window.app.destroy ? window.app.destroy() : "";
   document.querySelector("canvas")
     ? document.querySelector("canvas").remove()
     : "";
   getFinalUrlAfterRedirects(
-    "https://source.unsplash.com/collection/1386982/900x700"
+    //"https://source.unsplash.com/collection/1386982/900x700"
+    "https://source.unsplash.com/collection/1116586/" +
+      window.innerWidth +
+      "x" +
+      window.innerHeight
   )
     .then(function(url) {
       loadPixelsFromImage(url, document);
@@ -68,12 +82,14 @@ function loadPixelsFromImage(finalUrl, document) {
   base_image.crossOrigin = "Anonymous";
   base_image.src = finalUrl;
   base_image.onload = function() {
-    const picSizeScale =
-      base_image.width / window.innerWidth > 0.8
-        ? 1 / (base_image.width / window.innerWidth) * 0.8
-        : 1;
-    const scaledWidth = Math.floor(base_image.width * picSizeScale);
-    const scaledHeight = Math.floor(base_image.height * picSizeScale);
+    // const picSizeScale =
+    //   base_image.width / window.innerWidth > 0.95
+    //     ? 1 / (base_image.width / window.innerWidth) * 0.95
+    //     : 1;
+    // const scaledWidth = Math.floor(base_image.width * picSizeScale);
+    // const scaledHeight = Math.floor(base_image.height * picSizeScale);
+    const scaledWidth = Math.floor(base_image.width);
+    const scaledHeight = Math.floor(base_image.height);
     context.canvas.width = base_image.width;
     context.canvas.height = base_image.height;
     context.drawImage(base_image, 0, 0, scaledWidth, scaledHeight);
@@ -130,7 +146,7 @@ function render(newPictureX, newPictureY, imageSrc) {
   // create an array to store all the sprites
   var maggots = [];
 
-  var totalSprites = app.renderer instanceof PIXI.WebGLRenderer ? 30000 : 100;
+  var totalSprites = app.renderer instanceof PIXI.WebGLRenderer ? 30000 : 1000;
 
   //app.renderer.resize(window.innerWidth, window.innerHeight);
   app.renderer.resize(newPictureX, newPictureY);
@@ -154,7 +170,6 @@ function render(newPictureX, newPictureY, imageSrc) {
 
     // create a random direction in radians
     dude.direction = Math.random() * Math.PI * 2;
-
     // this number will be used to modify the direction of the sprite over time
     dude.turningSpeed = Math.random() - 0.8;
 
@@ -168,9 +183,11 @@ function render(newPictureX, newPictureY, imageSrc) {
 
     sprites.addChild(dude);
   }
+  window.pixelDirection = Math.random() * Math.PI * 2;
+  window.pixelSpeed = (2 + Math.random() * 2) * 0.2;
 
   // create a bounding box box for the little maggots
-  var dudeBoundsPadding = 5;
+  var dudeBoundsPadding = 0;
   var dudeBounds = new PIXI.Rectangle(
     -dudeBoundsPadding,
     -dudeBoundsPadding,
@@ -180,20 +197,21 @@ function render(newPictureX, newPictureY, imageSrc) {
 
   var tick = 0;
   app.ticker.add(function() {
-    this.counter = this.counter || 0;
-    this.counter++;
+    const xChange = Math.sin(window.pixelDirection) * (window.pixelSpeed * 1);
+    const yChange = Math.cos(window.pixelDirection) * (window.pixelSpeed * 1);
     for (var i = 0; i < maggots.length; i++) {
       var dude = maggots[i];
 
-      if (window.scaleSize && dude.scale !== window.scaleSize)
-        dude.scale.set(window.scaleSize);
+      //if (window.scaleSize && dude.scale !== window.scaleSize)
+      if (window.scaleSize) dude.scale.set(window.scaleSize);
 
       //dude.scale.y = 0.95 + Math.sin(tick + dude.offset) * 0.05;
       //dude.direction += dude.turningSpeed * 0.01;
-      dude.x += Math.sin(dude.direction) * (dude.speed * dude.scale.y);
-      dude.y += Math.cos(dude.direction) * (dude.speed * dude.scale.y);
+      // dude.x += Math.sin(dude.direction) * (dude.speed * dude.scale.y);
+      // dude.y += Math.cos(dude.direction) * (dude.speed * dude.scale.y);
+      dude.x += xChange;
+      dude.y += yChange;
 
-      //if (this.counter % 2 === 0) {
       var normalizedLocation =
         Math.floor(dude.y) * newPictureX + Math.floor(dude.x);
       if (
@@ -218,7 +236,6 @@ function render(newPictureX, newPictureY, imageSrc) {
         dude.y -= dudeBounds.height;
       }
     }
-
     // increment the ticker
     tick += 0.1;
   });
@@ -226,18 +243,18 @@ function render(newPictureX, newPictureY, imageSrc) {
 
 function rgbToDec(rgb) {
   // if (
-  // 	Array.isArray(rgb) &&
-  // 	rgb.length > 2 &&
-  // 	typeof rgb[0] === "number" &&
-  // 	typeof rgb[1] === "number" &&
-  // 	typeof rgb[2] === "number"
+  //  Array.isArray(rgb) &&
+  //  rgb.length > 2 &&
+  //  typeof rgb[0] === "number" &&
+  //  typeof rgb[1] === "number" &&
+  //  typeof rgb[2] === "number"
   // )
-  // 	return (rgb[0] << 16) + (rgb[1] << 8) + rgb[2];
+  //  return (rgb[0] << 16) + (rgb[1] << 8) + rgb[2];
   // if (
-  // 	typeof rgb === "object" &&
-  // 	typeof rgb.r === "number" &&
-  // 	typeof rgb.g === "number" &&
-  // 	typeof rgb.b === "number"
+  //  typeof rgb === "object" &&
+  //  typeof rgb.r === "number" &&
+  //  typeof rgb.g === "number" &&
+  //  typeof rgb.b === "number"
   // )
   return (rgb.r << 16) + (rgb.g << 8) + rgb.b;
 }
@@ -272,4 +289,3 @@ function background(bgSize, inputSprite, type, forceSize) {
   sprite.position = pos;
   return bgContainer;
 }
-// loadPixelsFromImage("../../contour/images/girl.jpg", document);
