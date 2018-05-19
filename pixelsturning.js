@@ -197,10 +197,10 @@ function render(newPictureX, newPictureY, imageSrc) {
 
   var tick = 0;
   app.ticker.add(function() {
-    const xChange = Math.sin(window.pixelDirection) * (window.pixelSpeed * 1);
-    const yChange = Math.cos(window.pixelDirection) * (window.pixelSpeed * 1);
     for (var i = 0; i < maggots.length; i++) {
       var dude = maggots[i];
+      const xChange = Math.sin(window.pixelDirection) * (dude.speed * 1);
+      const yChange = Math.cos(window.pixelDirection) * (dude.speed * 1);
 
       //if (window.scaleSize && dude.scale !== window.scaleSize)
       if (window.scaleSize) dude.scale.set(window.scaleSize);
