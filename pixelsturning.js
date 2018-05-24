@@ -198,9 +198,30 @@ function render(newPictureX, newPictureY, imageSrc) {
   var tick = 0;
   app.ticker.add(function() {
     for (var i = 0; i < maggots.length; i++) {
-      var dude = maggots[i];
-      const xChange = Math.sin(window.pixelDirection) * (dude.speed * 1);
-      const yChange = Math.cos(window.pixelDirection) * (dude.speed * 1);
+      const dude = maggots[i];
+      
+      const normalizedLocation =
+        Math.floor(dude.y) * newPictureX + Math.floor(dude.x);
+      if (
+        loadPixelsFromImage.pixelArray &&
+        loadPixelsFromImage.pixelArray.length > normalizedLocation &&
+        normalizedLocation >= 0
+      ) {
+        var RGB = loadPixelsFromImage.pixelArray[normalizedLocation];
+        dude.tint = rgbToDec(RGB);
+      }
+      const speed = 
+        RGB.r > 220 ? 
+          dude.speed*1.0: 
+          RGB.g > 220 ?
+            dude.speed*1.0:
+            RGB.b > 220 ? 
+              dude.speed*1.0:
+              dude.speed * 3;
+
+      
+      const xChange = Math.sin(window.pixelDirection) * (speed * 1);
+      const yChange = Math.cos(window.pixelDirection) * (speed * 1);
 
       //if (window.scaleSize && dude.scale !== window.scaleSize)
       if (window.scaleSize) dude.scale.set(window.scaleSize);
@@ -212,16 +233,6 @@ function render(newPictureX, newPictureY, imageSrc) {
       dude.x += xChange;
       dude.y += yChange;
 
-      var normalizedLocation =
-        Math.floor(dude.y) * newPictureX + Math.floor(dude.x);
-      if (
-        loadPixelsFromImage.pixelArray &&
-        loadPixelsFromImage.pixelArray.length > normalizedLocation &&
-        normalizedLocation >= 0
-      ) {
-        var RGB = loadPixelsFromImage.pixelArray[normalizedLocation];
-        dude.tint = rgbToDec(RGB);
-      }
       //}
       // wrap the pixels
       if (dude.x < dudeBounds.x) {
